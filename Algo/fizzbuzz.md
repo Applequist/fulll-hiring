@@ -24,3 +24,20 @@ Display numbers between **1** and **N** by following the rules:
 - Quality of the code
 - Scalability of the algorithm
 - Usage of good practices and modern programming language features
+
+#### Result
+
+##### Naive implementation
+
+```sh
+fulll-hiring/Algo on  master [⇡] is 📦 v1.0.0 via  v14.21.3 
+❯ npm run bench
+
+> algo@1.0.0 bench /home/brieuc/Repositories/fulll-hiring/Algo
+> node index.js bench
+
+Running on Node 14.21.3
+Warmup(50 iterations): 0.04 ms / iteration
+Iteration(10000 iterations): 0.01 ms / iteration
+```
+
