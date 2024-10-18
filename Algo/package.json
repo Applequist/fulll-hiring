@@ -2,9 +2,9 @@
   "name": "algo",
   "version": "1.0.0",
   "description": "FizzBuzz...",
-  "main": "fizzbuzz.js",
   "scripts": {
-    "fizzbuzz": "node fizzbuzz.js"
+    "fizzbuzz": "node index.js fizzbuzz",
+    "bench": "node index.js bench"
   },
   "author": "Brieuc Desoutter",
   "license": "ISC"
