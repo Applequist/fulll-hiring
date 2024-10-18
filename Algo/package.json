@@ -1,0 +1,11 @@
+{
+  "name": "algo",
+  "version": "1.0.0",
+  "description": "FizzBuzz...",
+  "main": "fizzbuzz.js",
+  "scripts": {
+    "fizzbuzz": "node fizzbuzz.js"
+  },
+  "author": "Brieuc Desoutter",
+  "license": "ISC"
+}
