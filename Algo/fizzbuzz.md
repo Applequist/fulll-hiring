@@ -41,3 +41,19 @@ Warmup(50 iterations): 0.04 ms / iteration
 Iteration(10000 iterations): 0.01 ms / iteration
 ```
 
+##### Constant folding
+
+Fold `n % 3 == 0` and `n % 5 == 0` into constant.
+
+```sh
+fulll-hiring/Algo on  master [!⇡] is 📦 v1.0.0 via  v14.21.3 
+❯ npm run bench
+
+> algo@1.0.0 bench /home/brieuc/Repositories/fulll-hiring/Algo
+> node index.js bench
+
+Running on Node 14.21.3
+Warmup(50 iterations): 0.04 ms / iteration
+Iteration(10000 iterations): 0.0107 ms / iteration
+```
+
