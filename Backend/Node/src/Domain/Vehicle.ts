@@ -1,21 +1,35 @@
 import Location from "./Location.js";
 
-export default class Vehicle {
-  readonly id: string; // license plate
-  location: Location;
+export type VehicleId = string; // license plate number
 
-  constructor(id: string, location = new Location({ lon: 0, lat: 0 })) {
-    this.id = id;
-    this.location = location;
-  }
+/**
+ * A generic vehicle.
+ *
+ * We assume a vehicle is uniquely identified by its license plate and that 
+ * identitification last for as long as the vehicle is in our system.
+ */
+export class Vehicle {
+        id: VehicleId;
+        version: number;
+        location: Location;
 
-  parkAt(location: Location): boolean {
-    const move_there = !this.location.equals(location);
-    if (move_there) {
-      this.location = location;
-    }
-    return move_there;
-  }
+        constructor(id: VehicleId, version: number = 0, location = new Location({ lon: 0, lat: 0 })) {
+                this.id = id;
+                this.version = version;
+                this.location = location;
+        }
+
+        parkAt(location: Location): boolean {
+                const move_there = !this.location.equals(location);
+                if (move_there) {
+                        this.location = location;
+                }
+                return move_there;
+        }
 
 }
 
+export interface VehicleRepository {
+        save(vehicle: Vehicle): Promise<void>;
+        load(vehicleId: VehicleId): Promise<Vehicle | undefined>;
+}

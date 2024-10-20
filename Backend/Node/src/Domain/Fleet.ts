@@ -1,26 +1,38 @@
-import Vehicle from "./Vehicle.js";
+import { UserId } from "./User.js";
+import { VehicleId } from "./Vehicle.js";
 
-export default class Fleet {
-  readonly id: number;
-  readonly name: string;
-  vehicles: Vehicle[];
+export type FleetId = number;
 
-  constructor(id: number, name: string) {
-    this.id = id;
-    this.name = name;
-    this.vehicles = [];
-  }
+export class Fleet {
+    id: FleetId;
+    version: number;
+    ownerId: UserId;
+    vehicles: VehicleId[]; // use immutable collection?
 
-  hasVehicle(vehicle: Vehicle): boolean {
-    return this.vehicles.some((v) => v.id == vehicle.id);
-  }
-
-  registerVehicle(vehicle: Vehicle) {
-    const register_vehicle = !this.hasVehicle(vehicle);
-    if (register_vehicle) {
-      this.vehicles.push(vehicle);
+    constructor(id: FleetId, version: number, ownerId: UserId, vehicles: VehicleId[] = []) {
+        this.id = id;
+        this.version = version;
+        this.ownerId = ownerId;
+        this.vehicles = vehicles;
     }
-    return register_vehicle;
-  }
+
+    isVehicleRegistered(vehicleId: VehicleId): boolean {
+        return this.vehicles.some((vid) => vid == vehicleId);
+    }
+
+    registerVehicle(vehicleId: VehicleId) {
+        const register_vehicle = !this.isVehicleRegistered(vehicleId);
+        if (register_vehicle) {
+            this.vehicles.push(vehicleId);
+        }
+        return register_vehicle;
+    }
 };
 
+/**
+ * A simple Fleet repository to save and fetch Fleets.
+ */
+export interface FleetRepository {
+    save(fleet: Fleet): Promise<void>;
+    load(fleetId: FleetId): Promise<Fleet | undefined>;
+}
