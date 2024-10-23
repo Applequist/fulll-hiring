@@ -10,5 +10,5 @@ docker run -d \
     postgres
 
 # connect to the contenairized db using
-# $ psql -h localhost -p 5432 -U postgres
+# $ psql -h localhost -p 5432 -d fleetdb -U postgres --password
 

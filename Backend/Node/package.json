@@ -8,6 +8,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^12.1.0",
     "@cucumber/cucumber": "^11.0.1",
     "@tsconfig/node20": "^20.1.4",
     "@types/cucumber": "^6.0.1",
@@ -23,9 +24,10 @@
   "author": "Brieuc Desoutter",
   "license": "ISC",
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.20.0",
+    "commander": "^12.1.0",
     "pg": "^8.13.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.4",
-    "@dotenvx/dotenvx": "^1.20.0"
+    "sequelize": "^6.37.4"
   }
 }

@@ -18,10 +18,11 @@ export default class InMemoryFleetRepository implements FleetRepository {
 
     save(fleet: Fleet): Promise<void> {
         return this.load(fleet.id).then((current) => {
-            if (current.version != fleet.version) {
+            if (current.version > fleet.version) {
                 throw new Error(`Concurrent Modification Exception: Fleet(id = ${fleet.id}, version = ${fleet.version}) is outdated.`);
             } else {
-                current.version = fleet.version + 1;
+                fleet.version += 1;
+                current.version = fleet.version;
                 current.vehicles = fleet.vehicles;
             }
         });

@@ -27,6 +27,11 @@ export class Vehicle {
         this.location = location;
     }
 
+    /**
+     * Update the vehicle's location.
+     * @param location the new vehicle's location
+     * @returns true of the vehicle's location has changed, false otherwise.
+     */
     parkAt(location: Location): boolean {
         const move_there = !this.location.equals(location);
         if (move_there) {
@@ -59,7 +64,29 @@ export interface VehicleRepository {
      *          or rejects with an Error otherwise
      */
     save(vehicle: Vehicle): Promise<void>;
-    load(id: VehicleId): Promise<Vehicle | undefined>;
+
+    /**
+     * Load a Vehicle using its id.
+     * 
+     * @param id A vehicle's id, eg its license plate.
+     * @returns A Promise that resolves to a Vehicle if it is found, or
+     *          rejects to an Error otherwise.
+     */
+    load(id: VehicleId): Promise<Vehicle>;
+
+    /**
+     * Delete a vehicle. 
+     * The method will fail if the vehicle with the given id exists and is registered in a fleet.
+     * 
+     * @param id id of the vehicle to delete.
+     * @return a Promise that resolves to nothing if the method succeeds, 
+     *         or reject to an Error otherwise.
+     */
     delete(id: VehicleId): Promise<void>;
+
+    /**
+     * Delete all vehicles.
+     * @see delete
+     */
     deleteAll(): Promise<void>;
 }
