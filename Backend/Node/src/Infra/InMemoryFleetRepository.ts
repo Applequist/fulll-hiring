@@ -1,4 +1,4 @@
-import { Fleet, type FleetId, type FleetRepository } from "../Domain/Fleet.js"
+import { type UserId, Fleet, type FleetId, type FleetRepository } from "../Domain/Fleet.js"
 
 export default class InMemoryFleetRepository implements FleetRepository {
         static _nextId = 1;
@@ -8,26 +8,38 @@ export default class InMemoryFleetRepository implements FleetRepository {
 
         private fleets: Fleet[] = [];
 
-        save(fleet: Fleet): Promise<void> {
-                return this.load(fleet.id).then((current) => {
-                        if (current == undefined) {
-                                // insert
-                                fleet.id = InMemoryFleetRepository.nextId();
-                                fleet.version = 1;
-                                this.fleets.push(new Fleet(fleet.id, fleet.version, fleet.ownerId));
-                        } else if (current && current.version == fleet.version) {
-                                fleet.version += 1;
-                                current.version = fleet.version;
-                                current.vehicles = fleet.vehicles;
-                        } else {
-                                throw new Error("Concurrrent Modification Exception");
-                        }
-                });
+    create(ownerId: UserId): Promise<Fleet> {
+        const created = new Fleet(ownerId, [], InMemoryFleetRepository.nextId(), 1);
+        this.fleets.push(created);
+        return Promise.resolve(created);
+    }
 
-        }
+    save(fleet: Fleet): Promise<void> {
+        return this.load(fleet.id).then((current) => {
+            if (current == undefined) {
+                throw new Error("Unknown fleet");
+            } else if (current && current.version != fleet.version) {
+                throw new Error("Concurrrent Modification Exception");
+            } else {
+                current.version = fleet.version + 1;
+                current.vehicles = fleet.vehicles;
+            }
+        });
 
-        load(fleetId: FleetId): Promise<Fleet | undefined> {
-                const current = this.fleets.find((current) => current.id == fleetId);
-                return Promise.resolve(current);
-        }
+    }
+
+    load(id: FleetId): Promise<Fleet | undefined> {
+        const current = this.fleets.find((current) => current.id == id);
+        return Promise.resolve(current);
+    }
+
+    delete(id: FleetId): Promise<void> {
+        this.fleets = this.fleets.filter((f) => f.id != id);
+        return Promise.resolve();
+    }
+
+    deleteAll(): Promise<void> {
+        this.fleets = [];
+        return Promise.resolve();
+    }
 }

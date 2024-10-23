@@ -1,6 +1,6 @@
-import { UserId } from "./User.js";
 import { VehicleId } from "./Vehicle.js";
 
+export type UserId = string;
 export type FleetId = number;
 
 export class Fleet {
@@ -9,11 +9,11 @@ export class Fleet {
     ownerId: UserId;
     vehicles: VehicleId[]; // use immutable collection?
 
-    constructor(id: FleetId, version: number, ownerId: UserId, vehicles: VehicleId[] = []) {
-        this.id = id;
-        this.version = version;
+    constructor(ownerId: UserId, vehicles: VehicleId[] = [], id: FleetId = 0, version: number = 0) {
         this.ownerId = ownerId;
         this.vehicles = vehicles;
+        this.id = id;
+        this.version = version;
     }
 
     isVehicleRegistered(vehicleId: VehicleId): boolean {
@@ -33,6 +33,10 @@ export class Fleet {
  * A simple Fleet repository to save and fetch Fleets.
  */
 export interface FleetRepository {
+    create(ownerId: UserId): Promise<Fleet>;
     save(fleet: Fleet): Promise<void>;
-    load(fleetId: FleetId): Promise<Fleet | undefined>;
+    load(id: FleetId): Promise<Fleet | undefined>;
+    delete(id: FleetId): Promise<void>;
+    deleteAll(): Promise<void>;
 }
+
