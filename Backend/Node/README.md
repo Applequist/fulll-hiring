@@ -13,7 +13,35 @@ node migrate create --folder migrations/ --name new-migration.ts # create a new 
 
 ## Running the test
 
-Configure the storage mode in `step.js`:
+### In memory
+
+1. Configure the storage mode in `step.js`
+
+```js
+Before(function() {
+    const [Vehicles, Fleets] = config("memory"); // "postgres" or "memory"
+    this.Vehicles = Vehicles;
+    this.Fleets = Fleets;
+});
+```
+
+2. Run the test:
+
+```sh
+$ npm run test
+```
+
+### Using postgresql
+
+1. Pull postgresql official docker image.
+2. Edit `.env.test` 
+3. Start the local database:
+
+```sh
+$ ./start_db.sh
+```
+
+4. Configure the storage mode in `step.js`
 
 ```js
 Before(function() {
@@ -23,11 +51,8 @@ Before(function() {
 });
 ```
 
-If you choose `postgres`, start the database locally runing `./start_db.sh`
-
-Run the test:
+5. Run the test
 
 ```sh
-npm run test
+$ npm run test
 ```
-

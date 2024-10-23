@@ -6,23 +6,21 @@ export default class SqlVehicleRepository implements VehicleRepository {
     constructor(private sql: Sequelize) { }
 
     create(id: VehicleId, lon: number = 0.0, lat: number = 0.0): Promise<Vehicle> {
-        return this.sql.query('INSERT INTO vehicles (id, version, lon, lat) VALUES (:id, 1, :lon, :lat) RETURNING id;',
+        return this.sql.query('INSERT INTO vehicles (id, version, lon, lat) VALUES (:id, 1, :lon, :lat);',
             {
                 replacements: {
                     id,
                     lon,
                     lat
                 },
-                type: QueryTypes.INSERT
-            }).then((results: any[]) => {
-                console.log("Create Vehicle: ", results);
+                type: QueryTypes.RAW
+            }).then((_) => {
                 return new Vehicle(id, 1, new Location({ lon, lat }));
             });
     }
 
-    async save(vehicle: Vehicle): Promise<void> {
-        console.log("Saving vehicle...");
-        const [_, update_count] = await this.sql.query('UPDATE vehicles SET (version, lon, lat) = (version + 1, :lon, :lat) WHERE id = :id and version = :version;',
+    save(vehicle: Vehicle): Promise<void> {
+        return this.sql.query('UPDATE vehicles SET (version, lon, lat) = (version + 1, :lon, :lat) WHERE id = :id and version = :version;',
             {
                 replacements: {
                     id: vehicle.id,
@@ -31,20 +29,30 @@ export default class SqlVehicleRepository implements VehicleRepository {
                     lat: vehicle.location.lat
                 },
                 type: QueryTypes.UPDATE
+            }).then(([_, update_count]) => {
+                if (update_count == 0) {
+                    throw new Error(`Unknown Vehicle(id = ${vehicle.id})`);
+                } else {
+                    vehicle.version += 1;
+                }
             });
-        if (update_count > 0) {
-            vehicle.version += 1;
-        }
     }
 
-    load(id: VehicleId): Promise<Vehicle | undefined> {
+    load(id: VehicleId): Promise<Vehicle> {
         return this.sql.query('SELECT * FROM vehicles WHERE id = :id',
             {
                 replacements: {
                     id
                 },
                 type: QueryTypes.SELECT
-            }).then((results: any[]) => new Vehicle(results[0].id, results[0].version, new Location(results[0])));
+            }).then((results: any[]) => {
+                if (results.length == 1) {
+                    return new Vehicle(results[0].id, results[0].version, new Location(results[0]));
+                } else {
+                    // PrimaryKey constraint guarantees their is 0 or 1 vehicle with the given id.
+                    throw new Error(`Unknown Vehicle(id = ${id})`);
+                }
+            });
     }
 
     delete(id: VehicleId): Promise<void> {
@@ -52,11 +60,11 @@ export default class SqlVehicleRepository implements VehicleRepository {
             {
                 replacements: { id },
                 type: QueryTypes.DELETE
-            }).then((r) => console.log(r));
+            });
     }
 
     deleteAll(): Promise<void> {
-        return this.sql.query('DELETE FROM vehicles;').then(([results, meta]) => console.log("Deleted all vehicles"));
+        return this.sql.query('DELETE FROM vehicles;', { type: QueryTypes.DELETE });
     }
 }
 
