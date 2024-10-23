@@ -18,7 +18,7 @@ function config(db: "memory" | "postgres"): [VehicleRepository, FleetRepository]
             host: 'localhost',
             port: 5432,
             username: 'postgres',
-            password: 'mysecretpassword',
+            password: process.env.DB_PWD, // 'mysecretpassword',
             database: 'fleetdb',
             dialect: 'postgres',
             // logging: (...msg) => console.log(msg),

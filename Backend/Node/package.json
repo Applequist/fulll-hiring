@@ -18,13 +18,14 @@
   },
   "scripts": {
     "build": "rm -rf dist/ && tsc",
-    "test": "rm -rf dist/ && tsc && cucumber-js --profile default"
+    "test": "rm -rf dist/ && tsc && dotenvx run -f .env.test -- cucumber-js --profile default"
   },
   "author": "Brieuc Desoutter",
   "license": "ISC",
   "dependencies": {
     "pg": "^8.13.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.4"
+    "sequelize": "^6.37.4",
+    "@dotenvx/dotenvx": "^1.20.0"
   }
 }
