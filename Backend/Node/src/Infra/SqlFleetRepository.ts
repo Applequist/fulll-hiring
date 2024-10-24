@@ -1,6 +1,5 @@
 import { type UserId, Fleet, type FleetId, type FleetRepository } from "../Domain/Fleet.js"
 import { QueryTypes, Sequelize } from 'sequelize'
-import { VehicleId } from "../Domain/Vehicle.js";
 
 export default class SqlFleetRepository implements FleetRepository {
     constructor(private sql: Sequelize) { }
@@ -12,6 +11,7 @@ export default class SqlFleetRepository implements FleetRepository {
                     owner_id: ownerId
                 },
                 type: QueryTypes.RAW,
+                logging: false,
             }
         ).then(([results, metadata]: [any[], unknown]) => {
             return new Fleet(ownerId, [], results[0].id, 1);
@@ -23,7 +23,8 @@ export default class SqlFleetRepository implements FleetRepository {
             try {
                 const [_, update_count] = await this.sql.query('UPDATE fleets SET (owner_id, version) = (:owner_id, version + 1) WHERE id = :id AND version = :version', {
                     replacements: { owner_id: fleet.ownerId, id: fleet.id, version: fleet.version },
-                    type: QueryTypes.UPDATE
+                    type: QueryTypes.UPDATE,
+                    logging: false
                 });
                 if (update_count > 0) {
                     // merge fleet-vehicles relation
@@ -38,7 +39,8 @@ export default class SqlFleetRepository implements FleetRepository {
                             replacements: {
                                 rels
                             },
-                            type: QueryTypes.RAW
+                            type: QueryTypes.RAW,
+                            logging: false
                         });
                 }
                 await tx.commit();
@@ -52,7 +54,8 @@ export default class SqlFleetRepository implements FleetRepository {
     load(fleetId: FleetId): Promise<Fleet> {
         return this.sql.query('SELECT * FROM fleets as f LEFT JOIN fleet_vehicles as fv ON f.id = fv.fleet_id WHERE f.id = :id', {
             replacements: { id: fleetId },
-            type: QueryTypes.SELECT
+            type: QueryTypes.SELECT,
+            logging: false
         }).then((results: any[]) => {
             if (results.length == 0) {
                 throw new Error(`Unknown Fleet(id = ${fleetId})`);
@@ -70,12 +73,13 @@ export default class SqlFleetRepository implements FleetRepository {
                 replacements: {
                     id
                 },
-                type: QueryTypes.DELETE
+                type: QueryTypes.DELETE,
+                logging: false
             });
     }
 
     deleteAll(): Promise<void> {
-        return this.sql.query('DELETE FROM fleets;', { type: QueryTypes.DELETE });
+        return this.sql.query('DELETE FROM fleets;', { type: QueryTypes.DELETE, logging: false });
     }
 }
 

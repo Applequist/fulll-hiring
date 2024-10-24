@@ -2,10 +2,20 @@
   "name": "project",
   "version": "1.0.0",
   "description": "Fulll hiring tech interview",
+  "author": "Brieuc Desoutter",
+  "license": "ISC",
+  "type": "module",
   "main": "index.js",
-  "directories": {
-    "doc": "doc",
-    "test": "test"
+  "scripts": {
+    "build": "rm -rf dist/ && tsc",
+    "test": "rm -rf dist/ && tsc && cucumber-js --profile default"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.20.0",
+    "commander": "^12.1.0",
+    "pg": "^8.13.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.4"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^12.1.0",
@@ -16,18 +26,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "umzug": "^3.8.2"
-  },
-  "scripts": {
-    "build": "rm -rf dist/ && tsc",
-    "test": "rm -rf dist/ && tsc && dotenvx run -f .env.test -- cucumber-js --profile default"
-  },
-  "author": "Brieuc Desoutter",
-  "license": "ISC",
-  "dependencies": {
-    "@dotenvx/dotenvx": "^1.20.0",
-    "commander": "^12.1.0",
-    "pg": "^8.13.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.4"
   }
 }

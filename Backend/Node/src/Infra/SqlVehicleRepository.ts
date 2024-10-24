@@ -13,7 +13,8 @@ export default class SqlVehicleRepository implements VehicleRepository {
                     lon,
                     lat
                 },
-                type: QueryTypes.RAW
+                type: QueryTypes.RAW,
+                logging: false
             }).then((_) => {
                 return new Vehicle(id, 1, new Location({ lon, lat }));
             });
@@ -28,7 +29,8 @@ export default class SqlVehicleRepository implements VehicleRepository {
                     lon: vehicle.location.lon,
                     lat: vehicle.location.lat
                 },
-                type: QueryTypes.UPDATE
+                type: QueryTypes.UPDATE,
+                logging: false
             }).then(([_, update_count]) => {
                 if (update_count == 0) {
                     throw new Error(`Unknown Vehicle(id = ${vehicle.id})`);
@@ -44,7 +46,8 @@ export default class SqlVehicleRepository implements VehicleRepository {
                 replacements: {
                     id
                 },
-                type: QueryTypes.SELECT
+                type: QueryTypes.SELECT,
+                logging: false
             }).then((results: any[]) => {
                 if (results.length == 1) {
                     return new Vehicle(results[0].id, results[0].version, new Location(results[0]));
@@ -59,12 +62,13 @@ export default class SqlVehicleRepository implements VehicleRepository {
         return this.sql.query('DELETE FROM vehicles WHERE id = :id',
             {
                 replacements: { id },
-                type: QueryTypes.DELETE
+                type: QueryTypes.DELETE,
+                logging: false
             });
     }
 
     deleteAll(): Promise<void> {
-        return this.sql.query('DELETE FROM vehicles;', { type: QueryTypes.DELETE });
+        return this.sql.query('DELETE FROM vehicles;', { type: QueryTypes.DELETE, logging: false });
     }
 }
 

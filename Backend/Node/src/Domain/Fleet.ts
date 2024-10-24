@@ -59,7 +59,7 @@ export interface FleetRepository {
      * @returns A Promise that resolves to the Fleet if the fleet exists and the load is successful,
      *          or rejects with an Error otherwise.
      */
-    load(id: FleetId): Promise<Fleet | undefined>;
+    load(id: FleetId): Promise<Fleet>;
 
     /**
      * Delete a Fleet.

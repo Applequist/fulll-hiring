@@ -1,38 +1,19 @@
 import { Given, When, Then, After, Before, BeforeAll } from '@cucumber/cucumber';
-import { Fleet, FleetRepository } from "../../../src/Domain/Fleet.js";
-import { Vehicle, VehicleRepository } from '../../../src/Domain/Vehicle.js';
 import Location from '../../../src/Domain/Location.js';
 import assert from 'assert';
-import InMemoryFleetRepository from '../../../src/Infra/InMemoryFleetRepository.js';
-import InMemoryVehicleRepository from '../../../src/Infra/InMemoryVehicleRepository.js';
-import SqlFleetRepository from '../../../src/Infra/SqlFleetRepository.js';
 
-import { Sequelize } from 'sequelize'
-import SqlVehicleRepository from '../../../src/Infra/SqlVehicleRepository.js';
+import { configure, PersistenceConfig } from '../../../src/Infra/Persistence.js';
 
-function config(db: "memory" | "postgres"): [VehicleRepository, FleetRepository] {
-    if (db == "memory") {
-        return [new InMemoryVehicleRepository(), new InMemoryFleetRepository()];
-    } else {
-        const sequelize = new Sequelize({
-            host: 'localhost',
-            port: 5432,
-            username: 'postgres',
-            password: process.env.DB_PWD, // 'mysecretpassword',
-            database: 'fleetdb',
-            dialect: 'postgres',
-            // logging: (...msg) => console.log(msg),
-            pool: {
-                min: 2,
-                max: 10
-            }
-        });
-        return [new SqlVehicleRepository(sequelize), new SqlFleetRepository(sequelize)];
-    }
-}
+const storage: PersistenceConfig = {
+    host: 'localhost',
+    port: 5432,
+    username: 'postgres',
+    password: process.env.DB_PWD || 'mysecretpassword',
+    database: 'fleetdb',
+};
 
 Before(function () {
-    const [Vehicles, Fleets] = config("postgres");
+    const { Vehicles, Fleets } = configure(storage);
     this.Vehicles = Vehicles;
     this.Fleets = Fleets;
 });
