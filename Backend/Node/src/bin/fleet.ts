@@ -60,8 +60,12 @@ cli.command('localize-vehicle')
             const latitude = parseFloat(lat);
             const v = await localizeVehicle(persistence, fid, vehiclePlaceNumber, longitude, latitude);
             console.log(`Vehicle(id = ${v.id}): lon = ${longitude} lat = ${latitude}`);
-        } catch (e) {
-            console.log(e);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                console.log(e.message);
+            } else {
+                console.log("An error occured: ", e);
+            }
         } finally {
             persistence.close()
         }
