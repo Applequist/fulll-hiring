@@ -9,7 +9,16 @@ Feature: Register a vehicle
         Given Alice's fleet
         And vehicle '6052XAD'
         When Alice registers vehicle '6052XAD' into her fleet
-        Then vehicle '6052XAD' should be part of Alice's vehicle fleet
+        Then Alice's fleet has 1 registered vehicle
+        And vehicle '6052XAD' should be part of Alice's vehicle fleet
+
+    Scenario: A user can register multiple vehicle
+        Given Alice's fleet
+        And vehicle '1234abc'
+        And Alice has registered vehicle '1234abc' into her fleet
+        And vehicle '5678xyz'
+        When Alice registers vehicle '5678xyz' into her fleet
+        Then Alice's fleet has 2 registered vehicles
 
     Scenario: A user cannot register the same vehicle twice
         Given Alice's fleet

@@ -42,8 +42,9 @@ export default class SqlFleetRepository implements FleetRepository {
                             type: QueryTypes.RAW,
                             logging: false
                         });
+                    await tx.commit();
+                    fleet.version += 1;
                 }
-                await tx.commit();
             } catch (e) {
                 await tx.rollback();
                 throw e;

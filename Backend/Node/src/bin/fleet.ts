@@ -1,5 +1,5 @@
 import { program } from '@commander-js/extra-typings'
-import { createFleet, localizeVehicle, registerVehicle } from '../App/Command.js'
+import { createFleet, localizeVehicle, registerVehicle, unregisterVehicle } from '../App/Command.js'
 import { configure, Persistence, POSTGRES } from '../Infra/Persistence.js';
 import { FleetId } from '../Domain/Fleet.js';
 
@@ -29,12 +29,33 @@ cli.command('create')
 
 cli.command('register-vehicle')
     .description('register a (new) vehicle into a fleet')
-    .argument('<number>', 'the id of the fleet the register the vehicle into')
+    .argument('<number>', 'the id of the fleet to register the vehicle into')
     .argument('<string>', 'the license plate (id) of the vehicle to register')
     .action(async (fleetId: string, vehiclePlaceNumber: string) => {
         try {
             const fid: FleetId = parseInt(fleetId);
             const fleet = await registerVehicle(persistence, fid, vehiclePlaceNumber);
+            console.log(`Fleet: ${fid}`);
+            console.log("------------------------------------");
+            for (const v of fleet.vehicles.entries()) {
+                console.log(`${v[0]}: ${v[1]}`);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            persistence.close()
+        }
+    })
+
+
+cli.command('unregister-vehicle')
+    .description('unregister a  vehicle from a fleet')
+    .argument('<number>', 'the id of the fleet to unregister the vehicle from')
+    .argument('<string>', 'the license plate (id) of the vehicle to unregister')
+    .action(async (fleetId: string, vehiclePlaceNumber: string) => {
+        try {
+            const fid: FleetId = parseInt(fleetId);
+            const fleet = await unregisterVehicle(persistence, fid, vehiclePlaceNumber);
             console.log(`Fleet: ${fid}`);
             console.log("------------------------------------");
             for (const v of fleet.vehicles.entries()) {

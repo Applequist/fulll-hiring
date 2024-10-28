@@ -30,6 +30,16 @@ export const registerVehicle = async (persistence: Persistence, fleetId: FleetId
     return f;
 }
 
+export const unregisterVehicle = async (persistence: Persistence, fleetId: FleetId, vehicleId: VehicleId): Promise<Fleet> => {
+    const f = await persistence.Fleets.load(fleetId);
+    if (f == undefined) {
+        throw new Error(`Fleet(id = ${fleetId} not found`);
+    }
+    f.vehicles = f.vehicles.filter((vid) => vid != vehicleId);
+    await persistence.Fleets.save(f);
+    return f;
+}
+
 export const localizeVehicle = async (persistence: Persistence, fleetId: FleetId, vehicleId: VehicleId, lon: number, lat: number): Promise<Vehicle> => {
     const f = await persistence.Fleets.load(fleetId);
     if (!f.isVehicleRegistered(vehicleId)) {
