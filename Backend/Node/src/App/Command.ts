@@ -20,8 +20,11 @@ const loadOrCreateVehicle = async (persistence: Persistence, vehicleId: VehicleI
 
 export const registerVehicle = async (persistence: Persistence, fleetId: FleetId, vehicleId: VehicleId): Promise<Fleet> => {
     const f = await persistence.Fleets.load(fleetId);
+    if (f == undefined) {
+        throw new Error(`Fleet(id = ${fleetId} not found`);
+    }
     const v = await loadOrCreateVehicle(persistence, vehicleId);
-    if (f?.registerVehicle(v.id)) {
+    if (f.registerVehicle(v.id)) {
         await persistence.Fleets.save(f);
     }
     return f;

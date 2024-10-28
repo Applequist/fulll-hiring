@@ -31,7 +31,7 @@ export default class SqlFleetRepository implements FleetRepository {
                     const rels = fleet.vehicles.map((vid) => `(${fleet.id}, '${vid}')`).join(',');
                     const query = 'MERGE INTO fleet_vehicles f ' +
                         `USING (VALUES${rels}) AS v (fleet_id, vehicle_id) ` +
-                        'ON f.fleet_id = v.fleet_id ' +
+                        'ON f.fleet_id = v.fleet_id and f.vehicle_id = v.vehicle_id ' +
                         'WHEN NOT MATCHED THEN INSERT (fleet_id, vehicle_id) VALUES (v.fleet_id, v.vehicle_id) ' +
                         'WHEN NOT MATCHED BY SOURCE THEN DELETE';
                     await this.sql.query(query,

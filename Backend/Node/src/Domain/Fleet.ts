@@ -21,11 +21,11 @@ export class Fleet {
     }
 
     registerVehicle(vehicleId: VehicleId) {
-        const register_vehicle = !this.isVehicleRegistered(vehicleId);
-        if (register_vehicle) {
+        const not_already_registered = !this.isVehicleRegistered(vehicleId);
+        if (not_already_registered) {
             this.vehicles.push(vehicleId);
         }
-        return register_vehicle;
+        return not_already_registered;
     }
 };
 

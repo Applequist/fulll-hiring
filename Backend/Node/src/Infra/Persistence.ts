@@ -46,7 +46,7 @@ export function configure(db: PersistenceConfig): Persistence {
             password: db.password,
             database: db.database,
             dialect: 'postgres',
-            // logging: (...msg) => console.log(msg),
+            logging: false,
             pool: {
                 min: 1,
                 max: 9
