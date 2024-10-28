@@ -2,102 +2,99 @@ import { Given, When, Then, After, Before, BeforeAll } from '@cucumber/cucumber'
 import Location from '../../../src/Domain/Location.js';
 import assert from 'assert';
 
-import { configure, PersistenceConfig } from '../../../src/Infra/Persistence.js';
+import { configure, POSTGRES } from '../../../src/Infra/Persistence.js';
 
-const storage: PersistenceConfig = {
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: process.env.DB_PWD || 'mysecretpassword',
-    database: 'fleetdb',
-};
 
-Before(function () {
-    const { Vehicles, Fleets } = configure(storage);
+Before(function() {
+    const { Vehicles, Fleets } = configure(POSTGRES);
     this.Vehicles = Vehicles;
     this.Fleets = Fleets;
 });
 
-After(async function () {
+After(async function() {
     await this.Fleets.deleteAll();
     await this.Vehicles.deleteAll();
 });
 
-Given('my fleet', async function () {
-    const my_fleet = await this.Fleets.create("Bob");
-    this.my_fleet_id = my_fleet.id;
-});
-
-Given('the fleet of another user', async function () {
-    const alice_fleet = await this.Fleets.create("Alice");
-    this.alice_fleet_id = alice_fleet.id;
-});
-
-Given('a vehicle', async function () {
-    this.vehicle_id = "6052XAD";
-    const v = await this.Vehicles.create(this.vehicle_id);
-});
-
-When('I register this vehicle into my fleet', async function () {
-    const my_fleet = await this.Fleets.load(this.my_fleet_id);
-    my_fleet.registerVehicle(this.vehicle_id);
-    await this.Fleets.save(my_fleet);
-});
-
-Then('this vehicle should be part of my vehicle fleet', async function () {
-    const my_fleet = await this.Fleets.load(this.my_fleet_id);
-    assert(my_fleet.isVehicleRegistered(this.vehicle_id));
-});
-
-Given('I have registered this vehicle into my fleet', async function () {
-    const my_fleet = await this.Fleets.load(this.my_fleet_id);
-    my_fleet.registerVehicle(this.vehicle_id);
-    await this.Fleets.save(my_fleet);
+Given('{word}\'s fleet', async function(user: string) {
+    const fleet = await this.Fleets.create(user);
+    this.fleets = { [user]: fleet.id, ...this.fleets };
 });
 
 
-Given('a location', function () {
-    this.location = new Location({ lon: 10, lat: 20 });
+Given('vehicle {string}', async function(plate: string) {
+    const v = await this.Vehicles.create(plate);
+    this.vehicles = { [plate]: v.id, ...this.fleets };
 });
 
-Given('this vehicle has been registered into the other user\'s fleet', async function () {
-    const alice_fleet = await this.Fleets.load(this.alice_fleet_id);
-    alice_fleet.registerVehicle(this.vehicle_id);
-    await this.Fleets.save(alice_fleet);
+Given('{word} has registered vehicle {string} into his/her fleet', async function(user: string, plate: string) {
+    const fleet = await this.Fleets.load(this.fleets[user]);
+    fleet.registerVehicle(plate);
+    await this.Fleets.save(fleet);
 });
 
-Given('my vehicle has been parked into this location', async function () {
-    const v = await this.Vehicles.load(this.vehicle_id);
-    v.parkAt(this.location);
+
+When('{word} registers vehicle {string} into his/her fleet', async function(user: string, plate: string) {
+    const fleet = await this.Fleets.load(this.fleets[user]);
+    fleet.registerVehicle(plate);
+    await this.Fleets.save(fleet);
+});
+
+Then('vehicle {string} should be part of {word}\'s vehicle fleet', async function(plate: string, user: string) {
+    const fleet = await this.Fleets.load(this.fleets[user]);
+    console.log(`${user}'s fleet: `, fleet);
+    assert(fleet.isVehicleRegistered(plate));
+});
+
+Given('location {string}: lon={float} lat={float}', function(loc_tag: string, lon: number, lat: number) {
+    this.locations = { [loc_tag]: new Location({ lon, lat }), ...this.locations };
+});
+
+Given('vehicle {string} has been registered into {word}\'s fleet', async function(plate: string, user: string) {
+    const fleet = await this.Fleets.load(this.fleets[user]);
+    fleet.registerVehicle(plate);
+    await this.Fleets.save(fleet);
+});
+
+Given('vehicle {string} has been parked into location {string}', async function(plate: string, loc_tag: string) {
+    const { lon, lat } = this.locations[loc_tag];
+    const v = await this.Vehicles.load(plate);
+    v.parkAt(new Location({ lon, lat }));
     await this.Vehicles.save(v);
 });
 
-When('I try to register this vehicle into my fleet', async function () {
-    const my_fleet = await this.Fleets.load(this.my_fleet_id);
-    this.already_registered = !my_fleet.registerVehicle(this.vehicle_id);
+When('{word} tries to register vehicle {string} into his/her fleet', async function(user: string, plate: string) {
+    const fleet = await this.Fleets.load(this.fleets[user]);
+    this.already_registered = !fleet.registerVehicle(plate);
+    if (!this.already_registered) {
+        await this.Fleets.save(fleet);
+    }
 });
 
-When('I park my vehicle at this location', async function () {
-    const my_vehicle = await this.Vehicles.load(this.vehicle_id);
-    my_vehicle.parkAt(this.location);
-    await this.Vehicles.save(my_vehicle);
+When('{word} parks vehicle {string} at location {string}', async function(user: string, plate: string, loc_tag: string) {
+    const v = await this.Vehicles.load(plate);
+    const { lon, lat } = this.locations[loc_tag];
+    v.parkAt(new Location({ lon, lat }));
+    await this.Vehicles.save(v);
 });
 
-When('I try to park my vehicle at this location', async function () {
-    const my_vehicle = await this.Vehicles.load(this.vehicle_id);
-    this.already_there = !my_vehicle.parkAt(this.location);
+When('{word} tries to park vehicle {string} at location {string}', async function(user: string, plate: string, loc_tag: string) {
+    const v = await this.Vehicles.load(plate);
+    const { lon, lat } = this.locations[loc_tag];
+    this.already_there = !v.parkAt(new Location({ lon, lat }));
 });
 
-Then('I should be informed that this vehicle has already been registered into my fleet', function () {
+Then('{word} should be informed that vehicle {string} has already been registered into his/her fleet', function(user: string, plate: string) {
     assert(this.already_registered);
 });
 
-Then('the known location of my vehicle should verify this location', async function () {
-    const vehicle = await this.Vehicles.load(this.vehicle_id);
-    assert(vehicle.location.equals(this.location));
+Then('the current location of vehicle {string} should be location {string}', async function(plate: string, loc_tag: string) {
+    const vehicle = await this.Vehicles.load(plate);
+    const { lon, lat } = this.locations[loc_tag];
+    assert(vehicle.location.equals(new Location({ lon, lat })));
 });
 
-Then('I should be informed that my vehicle is already parked at this location', function () {
+Then('{word} should be informed that vehicle {string} is already parked at location {string}', function(user: string, plate: number, loc_tag: string) {
     assert(this.already_there);
 });
 

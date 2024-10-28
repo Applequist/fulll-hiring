@@ -16,11 +16,11 @@ export type DbConfig = {
 };
 
 export const POSTGRES: DbConfig = {
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: process.env.DB_PWD || 'mysecretpasswords',
-    database: 'fleetdb'
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PWD || '',
+    database: process.env.DB_NAME || 'fleetdb'
 };
 
 export type PersistenceConfig = "memory" | DbConfig;
