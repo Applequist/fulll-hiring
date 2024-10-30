@@ -4,7 +4,6 @@
   "description": "Fulll hiring tech interview",
   "author": "Brieuc Desoutter",
   "license": "ISC",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "build": "rm -rf dist/ && tsc",
