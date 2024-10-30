@@ -11,6 +11,14 @@ That is .ts files are compiled into CommonJS javascript modules.
 FIXME: I'd rather have .ts files compiled into ESM javascript modules (by adding type: "module" in package.json) 
 but this breaks the migrate/umzug setup and I can't fix it. So I'd have to live with CommonJs module for now...
 
+### Dependencies
+
+- db: Postgres running in Docker
+- Sequelize for data access. I would use something simpler like postgres.js but that gives us more choice for the db.
+- Umzug for db migrations
+- Commander for the CLI
+- dotenvx: to inject DB information into Node process.env
+
 ## Design Decisions
 
 ### Domain model
@@ -31,20 +39,39 @@ The Fleet entity relation is *modelled* as an array of vehicle ids which are all
 
 Both entities have a `version` field to prevent lost updates. This is especially useful for vehicles which can be shared between fleets (and their owner)
 
+The DB also includes an index for both entities on their id.
 
-### API or no API
+### Database persistence:
 
-Not sure from the instruction whether the CLI should access the domain model through an API. Did not do it.
+#### Database setup
 
-### Dependencies
+1. Pull official Postgres Docker image.
 
-- db: Postgres running in Docker
-- Sequelize for data access. I would use something simpler like postgres.js but that gives us more choice for the db.
-- Umzug for db migrations
-- Commander for the CLI
+2. Export DB information into '.env.test':
 
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PWD=mysecretpassword
+DB_NAME=fleetdb
+```
 
-## Database migrations:
+3. Start db: 
+
+```sh
+$ ./start_db.sh
+```
+
+4. Run migrations
+
+```sh
+$ node migrate up
+```
+
+See `migrations/` for database schema definition.
+
+#### Using migrate
 
 ```sh
 node migrate --help # show CLI help
@@ -55,6 +82,35 @@ node migrate down --to 0 # revert all migrations
 node migrate up --step 2 # run only two migrations
 
 node migrate create --folder migrations/ --name new-migration.ts # create a new migration file
+```
+
+## API or no API
+
+Not sure from the instructions whether the CLI should access the domain model through an API. Did not do it.
+
+## CLI
+
+```sh
+$ npm run fleet -- --help
+
+> project@1.0.0 fleet
+> dotenvx run -f .env.test -- node dist/src/bin/fleet --help
+
+[dotenvx@1.20.0] injecting env (5) from .env.test
+Usage: fleet [options] [command]
+
+Manage fleets of vehicles
+
+Options:
+  -h, --help                                                   display help for command
+
+Commands:
+  create <userId>                                              create a new fleet owned by the given user and returns the new
+                                                               fleet's id.
+  register-vehicle <number> <string>                           register a (new) vehicle into a fleet
+  unregister-vehicle <number> <string>                         unregister a  vehicle from a fleet
+  localize-vehicle <fleetId> <vehiclePlateNumber> <lon> <lat>  update a vehicle current location
+  help [command]                                               display help for command
 ```
 
 ## Running the test
@@ -81,15 +137,8 @@ $ npm run test
 
 ### Using postgresql
 
-1. Pull postgresql official docker image.
-2. Edit `.env.test` 
-3. Start the local database:
-
-```sh
-$ ./start_db.sh
-```
-
-4. Configure the storage mode in `step.js`
+1. Setup database (see Database persistence)
+2. Configure the storage mode in `step.js`
 
 ```js
 import { configure, POSTGRES } from '../../../src/Infra/Persistence.js';
